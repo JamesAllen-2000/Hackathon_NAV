@@ -13,7 +13,7 @@ app = Flask(__name__)
 app.secret_key = 'hackathon-ai-interviewer-2025'
 CORS(app)
 
-# Session storage
+
 sessions = {}
 
 def get_session_id():
@@ -49,7 +49,7 @@ def capture_screen():
     try:
         image_data = request.json.get('image')
         if image_data:
-            # Just store base64 - don't process yet
+            
             data['screen_images'].append(image_data)
             return jsonify({
                 'success': True,
@@ -91,13 +91,13 @@ def process_all():
     
     data['processing'] = True
     
-    # Process in background thread
+    
     def process():
         try:
-            # Initialize OCR handler only (transcripts come from browser)
+           
             ocr_handler = OCRHandler()
             
-            # Process screens
+            
             print(f"Processing {len(data['screen_images'])} screens...")
             for i, img_data in enumerate(data['screen_images']):
                 img_data = img_data.split(',')[1] if ',' in img_data else img_data
@@ -109,10 +109,10 @@ def process_all():
                     data['screen_texts'].append({'text': text})
                 print(f"  Screen {i+1}/{len(data['screen_images'])} done")
             
-            # Audio transcripts already collected via Web Speech API
+            
             print(f"Audio transcripts: {len(data['audio_transcripts'])} segments received")
             
-            # Combine context
+           
             screen_text = '\n\n'.join([f"[{i+1}] {t['text']}" for i, t in enumerate(data['screen_texts'])])
             audio_text = '\n\n'.join([f"[{i+1}] {t['text']}" for i, t in enumerate(data['audio_transcripts'])])
             
@@ -123,13 +123,12 @@ def process_all():
                 'screen_text': screen_text,
                 'audio_transcript': audio_text if audio_text else "[No audio transcription available]"
             }
-            
-            # Understanding Agent
+          
             print("Analyzing context...")
             understanding_agent = UnderstandingAgent()
             data['project_context'] = understanding_agent.understand(perception_data)
             
-            # Interview Agent
+            
             print("Generating questions...")
             interview_agent = InterviewAgent()
             data['questions'] = interview_agent.generate_initial_questions(data['project_context'])
@@ -200,7 +199,7 @@ def evaluate():
 def reset():
     session_id = get_session_id()
     if session_id in sessions:
-        # Cleanup audio files
+        
         for filepath in sessions[session_id].get('audio_files', []):
             if os.path.exists(filepath):
                 os.remove(filepath)
@@ -210,5 +209,5 @@ def reset():
 if __name__ == '__main__':
     os.makedirs('templates', exist_ok=True)
     os.makedirs('temp_audio', exist_ok=True)
-    # Disable auto-reloader so background threads aren't killed
+   
     app.run(debug=True, port=5000, host='127.0.0.1', threaded=True, use_reloader=False)

@@ -1,17 +1,17 @@
-# 🎥 AI-Driven Automated Interviewer
+#  AI-Driven Automated Interviewer
 
 An intelligent interview system that captures your presentation via screen share and voice, then generates context-aware technical questions based on what you presented.
 
-## ✨ Features
+##  Features
 
-- 🖥️ **Browser-based screen capture** (every 10 seconds)
-- 🎤 **Real-time voice transcription** using Web Speech API
-- 🤖 **AI-powered question generation** based on your presentation
-- 💬 **Voice-based Q&A** - Answer questions by speaking
-- 📊 **Automated evaluation** with detailed feedback
-- ⚡ **Zero lag** - All processing happens after capture
+-  **Browser-based screen capture** (every 10 seconds)
+-  **Real-time voice transcription** using Web Speech API
+-  **AI-powered question generation** based on your presentation
+-  **Voice-based Q&A** - Answer questions by speaking
+-  **Automated evaluation** with detailed feedback
+-  **Zero lag** - All processing happens after capture
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Install Dependencies
 ```bash
@@ -37,7 +37,7 @@ python app.py
 
 Open http://127.0.0.1:5000 in **Chrome** browser
 
-## 📖 How to Use
+##  How to Use
 
 1. **Start Presentation**
    - Click "Start Presentation"
@@ -52,7 +52,7 @@ Open http://127.0.0.1:5000 in **Chrome** browser
 
 3. **Interview**
    - AI generates questions based on your presentation
-   - Click "🎤 Start Voice Answer" to speak your answer
+   - Click " Start Voice Answer" to speak your answer
    - Or type your answer
    - Submit to move to next question
 
@@ -60,7 +60,7 @@ Open http://127.0.0.1:5000 in **Chrome** browser
    - Get scored on clarity, technical depth, and completeness
    - Receive detailed feedback
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ```
 Hackathon/
@@ -81,7 +81,7 @@ Hackathon/
 
 ```
 
-## 🔧 Configuration
+##  Configuration
 
 ### LLM Models
 Edit `config.py` to change models:
@@ -106,7 +106,7 @@ SCORING_CRITERIA = {
 }
 ```
 
-## 🎯 Tech Stack
+##  Tech Stack
 
 - **Backend**: Flask + Python
 - **Frontend**: HTML/CSS/JavaScript
@@ -115,17 +115,17 @@ SCORING_CRITERIA = {
 - **LLM**: Groq API (Llama 3.3 70B)
 - **Image Processing**: Pillow
 
-## 🆓 Free APIs Used
+##  Free APIs Used
 
 - **Groq**: 14,400 requests/day, 30K tokens/min (FREE!)
 - **Web Speech API**: Built into Chrome (FREE!)
 - **EasyOCR**: Local CPU processing (FREE!)
 
-## 📝 License
+##  License
 
 MIT License - Feel free to use for your hackathon!
 
-## ⚡ Troubleshooting
+##  Troubleshooting
 
 **Screen capture not working?**
 - Use Chrome browser (required for Web Speech API)
@@ -144,7 +144,7 @@ MIT License - Feel free to use for your hackathon!
 - This is normal on CPU
 - System processes screens AFTER you stop (no lag during capture)
 
-## 🎉 Demo Ready!
+##  Demo Ready!
 
 This system is optimized for hackathon demos:
 - ✅ No lag during presentation
@@ -153,4 +153,4 @@ This system is optimized for hackathon demos:
 - ✅ Voice-based interface
 - ✅ Professional UI
 
-Good luck! 🚀
+Good luck! 

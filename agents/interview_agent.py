@@ -26,17 +26,17 @@ class InterviewAgent:
         """
         print(f"Generating {NUM_INITIAL_QUESTIONS} initial interview questions...")
         
-        # Generate prompt
+        
         prompt = PromptTemplates.interview_prompt(project_context)
         
         try:
-            # Get LLM response
+            
             response = self.llm_client.generate(prompt, max_tokens=400)
             
-            # Parse questions
+            
             questions = self._parse_questions(response)
             
-            # Fallback if parsing failed
+            
             if not questions or len(questions) < NUM_INITIAL_QUESTIONS:
                 questions = self._extract_questions_fallback(response)
             
@@ -45,7 +45,7 @@ class InterviewAgent:
             
         except Exception as e:
             print(f"✗ Question Generation Error: {str(e)}")
-            # Return default questions
+        
             return [
                 "Can you explain the main purpose of your project?",
                 "What technologies did you use and why?",
@@ -66,14 +66,14 @@ class InterviewAgent:
         """
         print("Generating follow-up question...")
         
-        # Generate prompt
+      
         prompt = PromptTemplates.followup_prompt(question, answer, project_context)
         
         try:
-            # Get LLM response
+
             response = self.llm_client.generate(prompt, max_tokens=200)
             
-            # Parse follow-up
+           
             followup = self._parse_followup(response)
             
             print("✓ Follow-up question generated")
@@ -112,13 +112,13 @@ class InterviewAgent:
         """
         questions = []
         
-        # Try to match Q1:, Q2:, Q3: pattern
+        
         pattern = r'Q\d+:\s*(.+?)(?=\n(?:Q\d+:|$))'
         matches = re.findall(pattern, response, re.DOTALL | re.IGNORECASE)
         
         for match in matches:
             question = match.strip()
-            if question and len(question) > 10:  # Filter out too short matches
+            if question and len(question) > 10:  
                 questions.append(question)
         
         return questions
@@ -135,11 +135,11 @@ class InterviewAgent:
         """
         questions = []
         
-        # Split by lines and look for question marks
+        
         lines = response.split('\n')
         for line in lines:
             line = line.strip()
-            # Remove bullet points, numbers, etc.
+            
             line = re.sub(r'^[\d\.\-\*\)]+\s*', '', line)
             
             if '?' in line and len(line) > 20:
@@ -157,16 +157,16 @@ class InterviewAgent:
         Returns:
             Parsed follow-up question
         """
-        # Try to extract FOLLOWUP: pattern
+        
         followup_match = re.search(r'FOLLOWUP:\s*(.+?)$', response, re.DOTALL | re.IGNORECASE)
         if followup_match:
             return followup_match.group(1).strip()
         
-        # Fallback: look for first question mark
+        
         lines = response.split('\n')
         for line in lines:
             if '?' in line:
                 return line.strip()
         
-        # Last resort: return cleaned response
+        
         return response.strip()

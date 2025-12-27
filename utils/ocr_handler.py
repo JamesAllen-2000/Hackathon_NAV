@@ -37,13 +37,13 @@ class OCRHandler:
             Extracted text as string
         """
         try:
-            # Load reader if not already loaded
+            
             self._load_reader()
             
-            # Extract text using EasyOCR
+           
             results = self.reader.readtext(image_path)
             
-            # Combine all detected text
+            
             text = ' '.join([detection[1] for detection in results])
             
             return text.strip()
@@ -85,16 +85,16 @@ class OCRHandler:
             Extracted text as string
         """
         try:
-            # Load reader if not already loaded
+            
             self._load_reader()
             
-            # Convert PIL image to numpy array
+            
             image_np = np.array(image)
             
-            # Extract text using EasyOCR
+           
             results = self.reader.readtext(image_np)
             
-            # Combine all detected text
+            
             text = ' '.join([detection[1] for detection in results])
             
             return text.strip()

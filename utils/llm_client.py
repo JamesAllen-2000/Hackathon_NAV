@@ -29,7 +29,7 @@ class LLMClient:
         temperature = temperature or LLM_TEMPERATURE
         max_tokens = max_tokens or LLM_MAX_TOKENS
         
-        # OpenAI-compatible chat format
+        
         payload = {
             "model": LLM_MODEL_NAME,
             "messages": [
@@ -45,16 +45,16 @@ class LLMClient:
             
             result = response.json()
             
-            # OpenAI-compatible response format
+            
             if "choices" in result and len(result["choices"]) > 0:
                 return result["choices"][0]["message"]["content"].strip()
             
-            # Fallback
+           
             return str(result)
             
         except requests.exceptions.HTTPError as e:
             if e.response.status_code == 503:
-                # Model loading - retry after delay
+                
                 print("Model is loading... waiting 20 seconds...")
                 time.sleep(20)
                 return self.generate(prompt, temperature, max_tokens)

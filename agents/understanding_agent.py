@@ -24,14 +24,14 @@ class UnderstandingAgent:
         """
         print("Analyzing project context...")
         
-        # Generate prompt for understanding
+        
         prompt = PromptTemplates.understanding_prompt(perception_data)
         
         try:
-            # Get LLM response
+            
             response = self.llm_client.generate(prompt, max_tokens=600)
             
-            # Parse the response
+           
             context = self._parse_understanding_response(response)
             
             print("✓ Project context analyzed")
@@ -39,7 +39,7 @@ class UnderstandingAgent:
             
         except Exception as e:
             print(f"✗ Understanding Error: {str(e)}")
-            # Return default context on error
+           
             return {
                 "summary": "Unable to analyze project",
                 "tech_stack": "Unknown",
@@ -66,7 +66,7 @@ class UnderstandingAgent:
             "raw_response": response
         }
         
-        # Try to extract structured fields
+        
         summary_match = re.search(r'SUMMARY:\s*(.+?)(?=\n(?:TECH_STACK|COMPLEXITY|FEATURES)|$)', response, re.DOTALL | re.IGNORECASE)
         if summary_match:
             context["summary"] = summary_match.group(1).strip()
@@ -83,8 +83,8 @@ class UnderstandingAgent:
         if features_match:
             context["features"] = features_match.group(1).strip()
         
-        # Fallback: if structured parsing failed, use the whole response as summary
+        
         if not context["summary"] and response:
-            context["summary"] = response[:500]  # Take first 500 chars
+            context["summary"] = response[:500]  
         
         return context

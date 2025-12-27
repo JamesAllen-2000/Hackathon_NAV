@@ -33,7 +33,7 @@ class PerceptionAgent:
             "audio_transcript": ""
         }
         
-        # Process images with OCR
+       
         if image_paths:
             print("Processing screenshots with OCR...")
             try:
@@ -43,8 +43,6 @@ class PerceptionAgent:
                 print(f"✗ OCR Error: {str(e)}")
                 perception_data["screen_text"] = "[OCR processing failed]"
         
-        # Audio transcription handled by browser Web Speech API
-        # No processing needed here
         
         return perception_data
     
