@@ -46,6 +46,4 @@ outputs/
 # Streamlit
 .streamlit/
 
-GROQ_SETUP.md
-AI_Driven_Automated_Interviewer_POC_MVP.md
 temp_audio/
