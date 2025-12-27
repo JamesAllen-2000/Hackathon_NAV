@@ -1,0 +1,13 @@
+# Core Dependencies
+flask==3.0.0
+flask-cors==4.0.0
+requests==2.31.0
+python-dotenv==1.0.0
+
+# Image Processing
+pillow==10.1.0
+easyocr==1.7.0
+numpy<2.0
+
+# Data Validation
+pydantic==2.5.0

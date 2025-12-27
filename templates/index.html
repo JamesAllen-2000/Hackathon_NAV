@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Interviewer - Browser Capture</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5em; margin-bottom: 10px; }
+        
+        .content { padding: 40px; }
+        .stage { display: none; }
+        .stage.active { display: block; }
+        
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1em;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin: 10px;
+        }
+        .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 20px rgba(0,0,0,0.2); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .btn-success { background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%); }
+        .btn-danger { background: linear-gradient(135deg, #eb3349 0%, #f45c43 100%); }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .stat-label { color: #666; font-size: 0.9em; margin-bottom: 10px; }
+        .stat-value { color: #667eea; font-size: 2em; font-weight: 700; }
+        
+        .transcript-box {
+            background: #000;
+            color: #0f0;
+            font-family: 'Courier New', monospace;
+            padding: 20px;
+            border-radius: 10px;
+            min-height: 150px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 20px 0;
+            line-height: 1.6;
+            font-size: 1.1em;
+        }
+        .transcript-box.empty { color: #666; }
+        
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .recording { animation: pulse 1.5s infinite; }
+        
+        .question-box {
+            background: #fff3cd;
+            border-left: 5px solid #ffc107;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+        }
+        .question-box h3 { color: #856404; margin-bottom: 15px; }
+        
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 1em;
+            font-family: inherit;
+            resize: vertical;
+        }
+        textarea:focus { outline: none; border-color: #667eea; }
+        
+        .scores {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin: 30px 0;
+        }
+        .score-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+        }
+        .score-card .score { font-size: 3em; font-weight: 700; }
+        
+        .feedback-box {
+            background: #e7f3ff;
+            border-left: 5px solid #2196f3;
+            padding: 25px;
+            margin: 20px 0;
+            border-radius: 10px;
+            line-height: 1.8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎥 AI Interviewer</h1>
+            <p>Browser-Based Capture with Live Transcription</p>
+        </div>
+        
+        <div class="content">
+            <!-- Stage 1: Ready -->
+            <div id="stage-ready" class="stage active">
+                <h2>🚀 Ready to Start</h2>
+                <div style="background: #f8f9fa; padding: 30px; border-radius: 15px; margin: 20px 0;">
+                    <h3>How it works:</h3>
+                    <ol style="line-height: 2.5; padding-left: 20px; margin-top: 15px;">
+                        <li><strong>Open your presentation</strong> (PowerPoint, PDF, or demo)</li>
+                        <li>Click <strong>"Start Presentation"</strong> below</li>
+                        <li>Allow <strong>Screen Share</strong> (select your presentation window)</li>
+                        <li>Allow <strong>Microphone</strong> access</li>
+                        <li>Present for <strong>1-2 minutes</strong> (captures every 10 seconds)</li>
+                        <li>Watch <strong>live transcription</strong> of what you say</li>
+                        <li>Click <strong>"Stop"</strong> when done</li>
+                    </ol>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-success" onclick="startCapture()">🎬 Start Presentation</button>
+                </div>
+            </div>
+            
+            <!-- Stage 2: Presenting -->
+            <div id="stage-presenting" class="stage">
+                <h2 class="recording">🔴 Recording Live...</h2>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-label">Screen Captures</div>
+                        <div class="stat-value" id="screen-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Audio Transcripts</div>
+                        <div class="stat-value" id="audio-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Status</div>
+                        <div class="stat-value" style="font-size: 1.5em;" id="status-text">Capturing...</div>
+                    </div>
+                </div>
+                
+                <h3 style="margin: 30px 0 15px 0;">💬 Live Transcription (What You're Saying):</h3>
+                <div class="transcript-box" id="live-transcript">
+                    <div class="empty">>>> Speak to see live transcription...</div>
+                </div>
+                
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn btn-danger" id="stop-btn" onclick="stopCapture()" disabled>⏹️ Stop & Analyze</button>
+                </div>
+            </div>
+            
+            <!-- Stage 3: Interview -->
+            <div id="stage-interview" class="stage">
+                <h2>💬 Technical Interview</h2>
+                <div class="question-box">
+                    <h3 id="question-title">Question 1</h3>
+                    <p id="question-text" style="font-size: 1.2em; color: #333;"></p>
+                </div>
+                
+                <div style="margin: 20px 0;">
+                    <button class="btn" id="voice-answer-btn" onclick="toggleVoiceAnswer()">🎤 Start Voice Answer</button>
+                    <span id="voice-status" style="margin-left: 15px; color: #666;"></span>
+                </div>
+                
+                <textarea id="answer-input" placeholder="Speak your answer or type here..."></textarea>
+                
+                <div style="text-align: center; margin-top: 20px;">
+                    <button class="btn" onclick="submitAnswer()">➡️ Next Question</button>
+                    <button class="btn btn-success" id="finish-btn" onclick="finishInterview()" style="display:none;">✅ Finish Interview</button>
+                </div>
+            </div>
+            
+            <!-- Stage 4: Evaluation -->
+            <div id="stage-evaluation" class="stage">
+                <h2>✅ Interview Evaluation</h2>
+                <div class="scores">
+                    <div class="score-card">
+                        <h4>CLARITY</h4>
+                        <div class="score" id="score-clarity">0</div>
+                        <p>/10</p>
+                    </div>
+                    <div class="score-card">
+                        <h4>TECHNICAL DEPTH</h4>
+                        <div class="score" id="score-tech">0</div>
+                        <p>/10</p>
+                    </div>
+                    <div class="score-card">
+                        <h4>COMPLETENESS</h4>
+                        <div class="score" id="score-complete">0</div>
+                        <p>/10</p>
+                    </div>
+                    <div class="score-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                        <h4>FINAL SCORE</h4>
+                        <div class="score" id="score-final">0</div>
+                        <p>/10</p>
+                    </div>
+                </div>
+                <div class="feedback-box">
+                    <h3 style="margin-bottom: 15px;">📋 Detailed Feedback</h3>
+                    <div id="feedback-text"></div>
+                </div>
+                <div style="text-align: center; margin-top: 30px;">
+                    <button class="btn" onclick="resetSession()">🔄 Start New Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let screenStream = null;
+        let audioStream = null;
+        let mediaRecorder = null;
+        let screenCaptureInterval = null;
+        let audioChunks = [];
+        let questions = [];
+        let currentQuestionIdx = 0;
+        
+        function showStage(stage) {
+            document.querySelectorAll('.stage').forEach(s => s.classList.remove('active'));
+            document.getElementById(`stage-${stage}`).classList.add('active');
+        }
+        
+        async function startCapture() {
+            try {
+                // Get screen share
+                screenStream = await navigator.mediaDevices.getDisplayMedia({
+                    video: { mediaSource: 'screen' }
+                });
+                
+                // Get microphone
+                audioStream = await navigator.mediaDevices.getUserMedia({
+                    audio: true
+                });
+                
+                showStage('presenting');
+                
+                // Start screen capture (every 3 seconds)
+                startScreenCapture();
+                
+                // Start audio recording
+                startAudioRecording();
+                
+                // Start status polling
+                startStatusPolling();
+                
+            } catch (error) {
+                alert('Permission denied or error: ' + error.message);
+            }
+        }
+        
+        function startScreenCapture() {
+            const video = document.createElement('video');
+            video.srcObject = screenStream;
+            video.play();
+            
+            screenCaptureInterval = setInterval(() => {
+                const canvas = document.createElement('canvas');
+                canvas.width = video.videoWidth;
+                canvas.height = video.videoHeight;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(video, 0, 0);
+                
+                const imageData = canvas.toDataURL('image/png');
+                
+                // Send to server
+                fetch('/api/capture/screen', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: imageData })
+                }).then(res => res.json())
+                  .then(data => {
+                      if (data.text) {
+                          console.log('Screen text:', data.text);
+                      }
+                  });
+                
+            }, 10000); // 10 seconds = 6 captures per minute
+        }
+        
+        let recognition = null;
+        let fullTranscript = '';
+        let answerRecognition = null;
+        let isAnswering = false;
+        
+        function startAudioRecording() {
+            // Use Web Speech API for real-time transcription (no ffmpeg needed!)
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Speech recognition not supported in this browser. Please use Chrome.');
+                return;
+            }
+            
+            const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+            recognition = new SpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
+            recognition.lang = 'en-US';
+            
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let finalTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript + ' ';
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                if (finalTranscript) {
+                    fullTranscript += finalTranscript;
+                    // Send to server immediately
+                    fetch('/api/capture/transcript', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ text: finalTranscript.trim() })
+                    });
+                }
+                
+                // Update live display
+                updateLiveTranscript(fullTranscript + interimTranscript);
+            };
+            
+            recognition.onerror = (event) => {
+                console.error('Speech recognition error:', event.error);
+            };
+            
+            recognition.onend = () => {
+                // Auto-restart if still active
+                if (audioStream && audioStream.active) {
+                    recognition.start();
+                }
+            };
+            
+            recognition.start();
+        }
+        
+        function updateLiveTranscript(text) {
+            const box = document.getElementById('live-transcript');
+            box.innerHTML = `<div style="color: #0f0;">>> ${text}</div>`;
+            box.classList.remove('empty');
+        }
+        
+        function startStatusPolling() {
+            const interval = setInterval(async () => {
+                const res = await fetch('/api/status');
+                const status = await res.json();
+                
+                document.getElementById('screen-count').textContent = status.screen_captures;
+                document.getElementById('audio-count').textContent = status.audio_segments;
+                document.getElementById('status-text').textContent = status.ready ? 'Ready ✓' : 'Capturing...';
+                document.getElementById('stop-btn').disabled = !status.ready;
+                
+                if (status.stage !== 'idle') {
+                    clearInterval(interval);
+                }
+            }, 2000);
+        }
+        
+        async function stopCapture() {
+            // Stop streams
+            if (screenStream) screenStream.getTracks().forEach(track => track.stop());
+            if (audioStream) audioStream.getTracks().forEach(track => track.stop());
+            if (screenCaptureInterval) clearInterval(screenCaptureInterval);
+            if (recognition) recognition.stop();
+            
+            document.getElementById('stop-btn').textContent = 'Analyzing...';
+            document.getElementById('stop-btn').disabled = true;
+            
+            // Process
+            const res = await fetch('/api/process', { method: 'POST' });
+            
+            // Wait for processing to complete
+            const checkInterval = setInterval(async () => {
+                const statusRes = await fetch('/api/status');
+                const status = await statusRes.json();
+                
+                if (!status.processing && status.stage === 'interview') {
+                    clearInterval(checkInterval);
+                    location.reload(); // Reload to show interview
+                }
+            }, 2000);
+            
+            return; // Exit early
+            
+            const data = await res.json();
+            if (data.success) {
+                questions = [];
+                currentQuestionIdx = 0;
+                displayQuestion();
+                showStage('interview');
+            } else {
+                alert('Error: ' + data.error);
+            }
+        }
+        
+        function toggleVoiceAnswer() {
+            if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+                alert('Speech recognition not supported. Please use Chrome.');
+                return;
+            }
+            
+            if (isAnswering) {
+                // Stop recording
+                if (answerRecognition) answerRecognition.stop();
+                isAnswering = false;
+                document.getElementById('voice-answer-btn').textContent = '🎤 Start Voice Answer';
+                document.getElementById('voice-answer-btn').classList.remove('btn-danger');
+                document.getElementById('voice-status').textContent = '';
+            } else {
+                // Start recording
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                answerRecognition = new SpeechRecognition();
+                answerRecognition.continuous = true;
+                answerRecognition.interimResults = true;
+                answerRecognition.lang = 'en-US';
+                
+                let answerTranscript = document.getElementById('answer-input').value;
+                
+                answerRecognition.onresult = (event) => {
+                    let interimTranscript = '';
+                    
+                    for (let i = event.resultIndex; i < event.results.length; i++) {
+                        const transcript = event.results[i][0].transcript;
+                        if (event.results[i].isFinal) {
+                            answerTranscript += transcript + ' ';
+                        } else {
+                            interimTranscript += transcript;
+                        }
+                    }
+                    
+                    document.getElementById('answer-input').value = answerTranscript + interimTranscript;
+                };
+                
+                answerRecognition.onerror = (event) => {
+                    console.error('Answer recognition error:', event.error);
+                    isAnswering = false;
+                    document.getElementById('voice-answer-btn').textContent = '🎤 Start Voice Answer';
+                    document.getElementById('voice-answer-btn').classList.remove('btn-danger');
+                    document.getElementById('voice-status').textContent = 'Error: ' + event.error;
+                };
+                
+                answerRecognition.onend = () => {
+                    if (isAnswering) {
+                        answerRecognition.start(); // Auto-restart
+                    }
+                };
+                
+                answerRecognition.start();
+                isAnswering = true;
+                document.getElementById('voice-answer-btn').textContent = '⏹️ Stop Recording';
+                document.getElementById('voice-answer-btn').classList.add('btn-danger');
+                document.getElementById('voice-status').textContent = '🔴 Recording...';
+            }
+        }
+        
+        function displayQuestion() {
+            document.getElementById('question-title').textContent = `Question ${currentQuestionIdx + 1} of ${questions.length}`;
+            document.getElementById('question-text').textContent = questions[currentQuestionIdx];
+            document.getElementById('answer-input').value = '';
+            
+            // Stop any ongoing voice recording
+            if (isAnswering) {
+                toggleVoiceAnswer();
+            }
+            
+            if (currentQuestionIdx === questions.length - 1) {
+                document.getElementById('finish-btn').style.display = 'inline-block';
+            } else {
+                document.getElementById('finish-btn').style.display = 'none';
+            }
+        }
+        
+        async function submitAnswer() {
+            const answer = document.getElementById('answer-input').value;
+            if (!answer.trim()) {
+                alert('Please enter an answer');
+                return;
+            }
+            
+            const res = await fetch('/api/answer', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    question_idx: currentQuestionIdx,
+                    answer: answer
+                })
+            });
+            
+            const data = await res.json();
+            if (data.success && !data.is_last) {
+                currentQuestionIdx++;
+                displayQuestion();
+            }
+        }
+        
+        async function finishInterview() {
+            await submitAnswer();
+            
+            const res = await fetch('/api/evaluate', { method: 'POST' });
+            const data = await res.json();
+            
+            if (data.success) {
+                const eval = data.evaluation;
+                document.getElementById('score-clarity').textContent = eval.clarity || 0;
+                document.getElementById('score-tech').textContent = eval.technical_depth || 0;
+                document.getElementById('score-complete').textContent = eval.completeness || 0;
+                document.getElementById('score-final').textContent = eval.final_score || 0;
+                document.getElementById('feedback-text').textContent = eval.feedback || 'No feedback available';
+                
+                showStage('evaluation');
+            }
+        }
+        
+        async function resetSession() {
+            await fetch('/api/reset', { method: 'POST' });
+            location.reload();
+        }
+        
+        // Check status on page load
+        window.addEventListener('DOMContentLoaded', async () => {
+            const res = await fetch('/api/status');
+            const status = await res.json();
+            
+            if (status.stage === 'interview') {
+                // Fetch questions from server
+                const qRes = await fetch('/api/get-questions');
+                const qData = await qRes.json();
+                if (qData.questions) {
+                    questions = qData.questions;
+                    currentQuestionIdx = 0;
+                    displayQuestion();
+                    showStage('interview');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
